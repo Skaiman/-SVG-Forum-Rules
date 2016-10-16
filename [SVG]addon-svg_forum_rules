@@ -1,0 +1,869 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="svg_forum_rules" title="[SVG]Forum Rules" version_string="1.0.5" version_id="5" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates>
+    <template title="svg_forum_rules_tosUrl_description"><![CDATA[<dl class="ctrlUnit">
+	<dt></dt>
+	<dd><p class="explain" style="font-size:1em;color:#c62828">Выбираем <span style="font-weight:bold;color:#ef5350">"Собственный URL-адрес"</span> и пишем в текстовом поле адрес правил: <span style="font-weight:bold;color:#ef5350">/forum-rules</span></p></dd>
+</dl>]]></template>
+    <template title="svg_rules_admin_template"><![CDATA[<xen:title>{xen:phrase options}: {$group.title}</xen:title>
+<xen:h1>{$group.title}</xen:h1>
+
+<xen:container var="$head.optionCss">
+<style>
+.hiddenOption   { display: inline-block; font-size: 9px; margin-right: 3px; color: {xen:property mutedTextColor}; }
+.hiddenOption a { position: static; }
+.optionList a.optionAnchor { position: absolute; top: -80px; } /* prevents anchors pointing going under the fixed header */
+</style>
+</xen:container>
+
+<xen:if is="{$canEditGroup}">
+	<xen:topctrl>
+		<a href="{xen:adminlink 'options/add-option', '', "group_id={$group.group_id}"}" class="button">+ {xen:phrase add_option}</a>
+		<a class="button" href="{xen:adminlink 'options/display-order', $group}">{xen:phrase display_order}</a>
+		<a class="button" href="{xen:adminlink 'options/edit-group', $group}">{xen:phrase edit_group}</a>
+	</xen:topctrl>
+</xen:if>
+
+<xen:form action="{xen:adminlink 'options/save', $group}">
+	
+	<div class="topChoosers">
+		<div class="Popup">
+			<span class="muted">{xen:phrase option_groups}:</span> <a rel="Menu">{$group.title}</a>
+			<div class="Menu">
+				<div class="primaryContent menuHeader"><h3>{xen:phrase option_groups}</h3></div>
+				<ul class="secondaryContent blockLinksList">
+				<xen:foreach loop="$groups" value="$_group">
+					<li><a href="{xen:adminlink 'options/list', $_group}">{$_group.title}</a></li>
+				</xen:foreach>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<xen:if hascontent="true"><div class="optionGroupDescription muted"><i><xen:contentcheck>{xen:raw $group.description}</xen:contentcheck></i></div></xen:if>
+	
+	<ul class="tabs Tabs mainTabs" data-panes="#OptionPanes > li" data-history="on">
+		<xen:foreach loop="$tabTitles" key="$tabId" value="$tabTitle">
+			<li><a href="{$requestPaths.requestUri}#_tab{$tabId}">{$tabTitle}</a></li>
+		</xen:foreach>
+	</ul>
+	
+	<ul id="OptionPanes">
+		<xen:foreach loop="$renderedOptions" key="$tabId" value="$_tab">
+			<xen:if hascontent="true">
+				<li id="_tab{$tabId}">
+					<xen:contentcheck>
+						<xen:foreach loop="$_tab" value="$_group">
+							<fieldset class="optionList">
+								<xen:foreach loop="$_group" key="$optionId" value="$renderedOption">
+									{xen:raw $renderedOption}
+								</xen:foreach>
+							</fieldset>
+						</xen:foreach>
+					</xen:contentcheck>
+				</li>
+			</xen:if>
+		</xen:foreach>
+	</ul>
+
+	<xen:submitunit save="{xen:phrase save_changes}">
+		<input type="reset" class="button" value="{xen:phrase cancel}" accesskey="r" />
+	</xen:submitunit>
+</xen:form>]]></template>
+    <template title="svg_rules_note_background"><![CDATA[<input type="hidden" name="checkboxes[]" value="{$property.property_definition_id}" />
+<xen:selectunit name="properties[{$property.property_definition_id}]" value="{$property.propertyValueScalar}" label="{$property.title}" hint="{$property.property_name}">
+	<xen:option value="none" label="Без фона" />	
+	<xen:option value="solid" label="Сплошной" />
+	<xen:option value="striped" label="Полосатый" />
+	<xen:explain>{$property.description}</xen:explain>
+	<xen:html><xen:include template="style_property_unit_extra"><xen:set var="$reset">{xen:phrase reset}</xen:set></xen:include></xen:html>
+</xen:selectunit>]]></template>
+  </admin_templates>
+  <admin_template_modifications/>
+  <code_events>
+    <event event_id="svg_rules_init"><![CDATA[<p>Called when the SvgForumRules_Application object is initialized.</p>
+
+<p>Callback signature:</p>
+<blockquote><code><em>SvgForumRules_Application</em> $core</code></blockquote>
+
+<p>Arguments:</p>
+<ol>
+	<li><code><em>SvgForumRules_Application</em> $core</code></li>
+</ol>]]></event>
+  </code_events>
+  <code_event_listeners>
+    <listener event_id="init_dependencies" execute_order="100" callback_class="SvgForumRules_Application_Core" callback_method="init" active="1" hint="" description=""/>
+    <listener event_id="navigation_tabs" execute_order="1" callback_class="SvgForumRules_Listeners_SvgRulesNav" callback_method="navtabs" active="1" hint="" description=""/>
+    <listener event_id="svg_rules_init" execute_order="10" callback_class="SvgForumRules_Application" callback_method="init" active="1" hint="" description=""/>
+    <listener event_id="template_create" execute_order="10" callback_class="SvgForumRules_Listeners_Template" callback_method="createAdminOptionList" active="1" hint="option_list" description=""/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups>
+    <group group_id="svg_forum_rules_options" display_order="1" debug_only="0"/>
+    <option option_id="svg_forum_rules_sidebar_enable" edit_format="onoff" data_type="string" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="150"/>
+    </option>
+    <option option_id="svg_forum_rules_tosUrl_description" edit_format="template" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>svg_forum_rules_tosUrl_description</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="132"/>
+    </option>
+    <option option_id="svg_rules_alert_delay" edit_format="spinbox" data_type="string" can_backup="1">
+      <default_value>4000</default_value>
+      <edit_format_params>min=0
+max=10000
+step=1000</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="270"/>
+    </option>
+    <option option_id="svg_rules_alert_enable" edit_format="onoff" data_type="string" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="250"/>
+    </option>
+    <option option_id="svg_rules_alert_text" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>&lt;span style="color:rgb(229,57,53)"&gt;Убедительная просьба прочитать наши правила, что бы в дальнейшем не возникало вопросов, почему администрация поступила так, по отношению к вам.&lt;/span&gt;</default_value>
+      <edit_format_params>rows=2</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="260"/>
+    </option>
+    <option option_id="svg_rules_button_enable" edit_format="onoff" data_type="string" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="900"/>
+    </option>
+    <option option_id="svg_rules_button_home" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Ознакомился</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="910"/>
+    </option>
+    <option option_id="svg_rules_button_selection" edit_format="select" data_type="string" can_backup="1">
+      <default_value>simple</default_value>
+      <edit_format_params>simple=Простые
+checkbox=С чекбоксом</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="950"/>
+    </option>
+    <option option_id="svg_rules_button_top" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Не ознакомился</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="920"/>
+    </option>
+    <option option_id="svg_rules_button_topic" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Комментировать</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="930"/>
+    </option>
+    <option option_id="svg_rules_button_topic_link" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>#</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="940"/>
+    </option>
+    <option option_id="svg_rules_caption" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Правила форума</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="110"/>
+    </option>
+    <option option_id="svg_rules_description" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Основные правила нашего форума.</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="130"/>
+    </option>
+    <option option_id="svg_rules_googlefont_enable" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>&lt;link href="//fonts.googleapis.com/css?family=Open+Sans:400,700&amp;subset=cyrillic" rel="stylesheet"&gt;</default_value>
+      <edit_format_params>rows=2</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="180"/>
+    </option>
+    <option option_id="svg_rules_item_01" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Регистрация пользователей.</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="300"/>
+    </option>
+    <option option_id="svg_rules_item_02" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Порядок поведения на форуме.</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="400"/>
+    </option>
+    <option option_id="svg_rules_item_03" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Публикация сообщений.</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="500"/>
+    </option>
+    <option option_id="svg_rules_item_04" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Отношения между пользователями и администрацией.</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="600"/>
+    </option>
+    <option option_id="svg_rules_item_05" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="700"/>
+    </option>
+    <option option_id="svg_rules_item_06" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="800"/>
+    </option>
+    <option option_id="svg_rules_navigate_enable" edit_format="onoff" data_type="string" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="190"/>
+    </option>
+    <option option_id="svg_rules_navitem_01" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Регистрация</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="310"/>
+    </option>
+    <option option_id="svg_rules_navitem_02" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Порядок поведения</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="410"/>
+    </option>
+    <option option_id="svg_rules_navitem_03" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Публикация сообщений</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="510"/>
+    </option>
+    <option option_id="svg_rules_navitem_04" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Отношения пользователей</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="610"/>
+    </option>
+    <option option_id="svg_rules_navitem_05" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="710"/>
+    </option>
+    <option option_id="svg_rules_navitem_06" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="810"/>
+    </option>
+    <option option_id="svg_rules_navtabs_enable" edit_format="onoff" data_type="string" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="160"/>
+    </option>
+    <option option_id="svg_rules_navtabs_position" edit_format="select" data_type="string" can_backup="1">
+      <default_value>middle</default_value>
+      <edit_format_params>home=Спереди (Не желательно)
+middle=По середине
+end=В конце</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="170"/>
+    </option>
+    <option option_id="svg_rules_navtabs_title" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Правила</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="100"/>
+    </option>
+    <option option_id="svg_rules_note" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>&lt;p&gt;Данные правила действуют на всем форуме. В отдельных категориях и разделах возможно наличие собственных правил, которые уточняют и детализируют  правила поведения в них. При этом данные правила остаются обязательными в любом случае.&lt;/p&gt;
+&lt;p&gt;Правила вводятся для создания комфортной и конструктивной атмосферы общения. Если Вас не устраивает установленная форма общения, воздержитесь от участия в данной форме.&lt;/p&gt;</default_value>
+      <edit_format_params>rows=10</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="210"/>
+    </option>
+    <option option_id="svg_rules_note_enable" edit_format="onoff" data_type="string" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="200"/>
+    </option>
+    <option option_id="svg_rules_note_fa" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>&lt;i class="fa fa-info-circle" aria-hidden="true"&gt;&lt;/i&gt;</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="220"/>
+    </option>
+    <option option_id="svg_rules_rules_01" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>&lt;li&gt;Регистрируясь на форуме, пользователь соглашается выполнять данные Правила.&lt;/li&gt;
+&lt;li&gt;Для регистрации на форуме пользователь должен предоставить действующий адрес электронной почты. Мы гарантируем конфиденциальность указанной информации.&lt;/li&gt;
+&lt;li&gt;Выбор имени пользователя (логин/login) является вашим исключительным правом. Администрация оставляет за собой право принять меры к прекращению использования логина, если его использование нарушает общепринятые моральные и этические нормы или является оскорбительным для других пользователей форума.&lt;/li&gt; 
+&lt;li&gt;Запрещена регистрация логина, схожим с уже существующими до степени, которые могут ввести в заблуждение других пользователей форума.&lt;/li&gt;
+&lt;li&gt;Запрещена неоднократная регистрация одним пользователем, вне зависимости от целей, с которыми такая регистрация проводится. Данное нарушение является крайне серьезным и ведет к блокированию всех учетных записей.&lt;/li&gt;
+&lt;li&gt;Если вы не проявляете активность на форуме в течение длительного времени, ваша учетная запись может быть удалена.&lt;/li&gt;</default_value>
+      <edit_format_params>rows=10</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="320"/>
+    </option>
+    <option option_id="svg_rules_rules_02" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>&lt;li&gt;Общение на форуме строится на принципах общепринятой морали и сетевого этикета.&lt;/li&gt;
+&lt;li&gt;Строго запрещено использование нецензурных слов, брани, оскорбительных выражений, в независимости от того, в каком виде и кому они были адресованы. В том числе при подмене букв символами.&lt;/li&gt;
+&lt;li&gt;Категорически запрещается любая реклама, в том числе реклама интернет-проектов (за исключением случаев предварительного согласования с администрацией).&lt;/li&gt;
+&lt;li&gt;Ваша подпись на форуме не может быть длиннее 2-ух строк. К ней предъявляются  те же требования, что и к сообщениям на форуме.&lt;/li&gt;</default_value>
+      <edit_format_params>rows=10</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="420"/>
+    </option>
+    <option option_id="svg_rules_rules_03" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>&lt;li&gt;Название темы должно быть информативным, максимально четко отражая смысл проблемы.&lt;/li&gt;
+&lt;li&gt;Перед созданием новой темы убедитесь, что вы создаете ее в форуме соответствующей тематики, а также постарайтесь убедиться в том, что данный вопрос не обсуждался ранее.&lt;li&gt;
+&lt;li&gt;Запрещено создание одинаковых тем в разных разделах и помещение одинаковых по смыслу сообщений в разные темы.&lt;/li&gt;
+&lt;li&gt;Старайтесь не делать грамматических ошибок в сообщениях – это создаст негативное впечатление о вас.&lt;/li&gt;</default_value>
+      <edit_format_params>rows=10</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="520"/>
+    </option>
+    <option option_id="svg_rules_rules_04" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>&lt;li&gt;В своих действиях администрация форума руководствуется здравым смыслом и внутренними правилами управления форумом.&lt;/li&gt;
+&lt;li&gt;Обсуждение действий администрации (администраторов и модераторов форума) категорически запрещается в любых форумах и темах, за исключением специализированного форума, предназначенного для обсуждения всех аспектов работы портала и всего форума.&lt;/li&gt;
+&lt;li&gt;Администрация оставляет за собой право изменять правила с последующим уведомлением об этом пользователей форума. Все изменения и новации на форуме производятся с учетом мнений и интересов пользователей.&lt;/li&gt;</default_value>
+      <edit_format_params>rows=10</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="620"/>
+    </option>
+    <option option_id="svg_rules_rules_05" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>rows=10</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="710"/>
+    </option>
+    <option option_id="svg_rules_rules_06" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>rows=10</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="820"/>
+    </option>
+    <option option_id="svg_rules_title" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value>Правила форума</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="svg_forum_rules_options" display_order="120"/>
+    </option>
+    <option option_id="tosUrl" edit_format="template" data_type="array" can_backup="1">
+      <default_value>a:2:{s:4:"type";s:7:"default";s:6:"custom";b:0;}</default_value>
+      <edit_format_params>option_template_tosUrl</edit_format_params>
+      <sub_options>type
+custom</sub_options>
+      <relation group_id="basicBoard" display_order="220"/>
+      <relation group_id="svg_forum_rules_options" display_order="131"/>
+    </option>
+  </optiongroups>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="option_group_svg_forum_rules_options" version_id="1" version_string="1.0.1"><![CDATA[[SVG]Forum Rules]]></phrase>
+    <phrase title="option_group_svg_forum_rules_options_description" version_id="1" version_string="1.0.1"><![CDATA[Настройки правил форума]]></phrase>
+    <phrase title="option_svg_forum_rules_sidebar_enable" version_id="1" version_string="1.0.1"><![CDATA[Сайдбар]]></phrase>
+    <phrase title="option_svg_forum_rules_sidebar_enable_explain" version_id="1" version_string="1.0.1"><![CDATA[Включение или отключение отображения сайдбара на странице правил форума.]]></phrase>
+    <phrase title="option_svg_forum_rules_tosUrl_description" version_id="5" version_string="1.0.5"><![CDATA[Description]]></phrase>
+    <phrase title="option_svg_forum_rules_tosUrl_description_explain" version_id="5" version_string="1.0.5"><![CDATA[]]></phrase>
+    <phrase title="option_svg_rules_alert_delay" version_id="3" version_string="1.0.3"><![CDATA[Время задержки]]></phrase>
+    <phrase title="option_svg_rules_alert_delay_explain" version_id="3" version_string="1.0.3"><![CDATA[Изменение времени задержки показа  всплывающего уведомления. Указывается миллисекундах (1 секунда=1000 миллисекунд). Если указать 0, то уведомление надо выключать вручную.]]></phrase>
+    <phrase title="option_svg_rules_alert_enable" version_id="3" version_string="1.0.3"><![CDATA[Всплывающее уведомление]]></phrase>
+    <phrase title="option_svg_rules_alert_enable_explain" version_id="3" version_string="1.0.3"><![CDATA[Включение или отключение всплывающего уведомления на странице правил форума.]]></phrase>
+    <phrase title="option_svg_rules_alert_text" version_id="3" version_string="1.0.3"><![CDATA[Текст уведомления]]></phrase>
+    <phrase title="option_svg_rules_alert_text_explain" version_id="3" version_string="1.0.3"><![CDATA[Изменение текста всплывающего уведомления. Используется форматирование текста в HTML формате.]]></phrase>
+    <phrase title="option_svg_rules_button_enable" version_id="1" version_string="1.0.1"><![CDATA[Кнопки после правил]]></phrase>
+    <phrase title="option_svg_rules_button_enable_explain" version_id="1" version_string="1.0.1"><![CDATA[Включение или отключение отображения кнопок после правил форума.]]></phrase>
+    <phrase title="option_svg_rules_button_home" version_id="1" version_string="1.0.1"><![CDATA[Кнопка на главную]]></phrase>
+    <phrase title="option_svg_rules_button_home_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение названия кнопки на главную страницу форума.]]></phrase>
+    <phrase title="option_svg_rules_button_selection" version_id="3" version_string="1.0.3"><![CDATA[Выбор кнопок]]></phrase>
+    <phrase title="option_svg_rules_button_selection_explain" version_id="3" version_string="1.0.3"><![CDATA[Выбор вида кнопок для правил форума.]]></phrase>
+    <phrase title="option_svg_rules_button_top" version_id="1" version_string="1.0.1"><![CDATA[Кнопка вверх]]></phrase>
+    <phrase title="option_svg_rules_button_topic" version_id="1" version_string="1.0.1"><![CDATA[Кнопка к обсуждению]]></phrase>
+    <phrase title="option_svg_rules_button_topic_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение названия кнопки для перехода к обсуждению правил в теме форума.]]></phrase>
+    <phrase title="option_svg_rules_button_topic_link" version_id="1" version_string="1.0.1"><![CDATA[Ссылка на тему]]></phrase>
+    <phrase title="option_svg_rules_button_topic_link_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение ссылки на тему для обсуждения правил.]]></phrase>
+    <phrase title="option_svg_rules_button_top_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение названия кнопки к началу правил.]]></phrase>
+    <phrase title="option_svg_rules_caption" version_id="1" version_string="1.0.1"><![CDATA[Заголовок страницы]]></phrase>
+    <phrase title="option_svg_rules_caption_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение заголовка страницы правил форума.]]></phrase>
+    <phrase title="option_svg_rules_description" version_id="1" version_string="1.0.1"><![CDATA[Описание страницы]]></phrase>
+    <phrase title="option_svg_rules_description_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение описания страницы правил форума.]]></phrase>
+    <phrase title="option_svg_rules_googlefont_enable" version_id="2" version_string="1.0.2"><![CDATA[Подключение шрифта Google Fonts]]></phrase>
+    <phrase title="option_svg_rules_googlefont_enable_explain" version_id="2" version_string="1.0.2"><![CDATA[Изменение подключения шрифта с сайта Google Fonts.]]></phrase>
+    <phrase title="option_svg_rules_item_01" version_id="1" version_string="1.0.1"><![CDATA[Первый пункт]]></phrase>
+    <phrase title="option_svg_rules_item_01_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение текста первого пункта правил форума.]]></phrase>
+    <phrase title="option_svg_rules_item_02" version_id="1" version_string="1.0.1"><![CDATA[Второй пункт]]></phrase>
+    <phrase title="option_svg_rules_item_02_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение текста второго пункта правил форума.]]></phrase>
+    <phrase title="option_svg_rules_item_03" version_id="1" version_string="1.0.1"><![CDATA[Третий пункт]]></phrase>
+    <phrase title="option_svg_rules_item_03_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение текста третьего пункта правил форума.]]></phrase>
+    <phrase title="option_svg_rules_item_04" version_id="1" version_string="1.0.1"><![CDATA[Четвертый пункт]]></phrase>
+    <phrase title="option_svg_rules_item_04_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение текста четвертого пункта правил форума.]]></phrase>
+    <phrase title="option_svg_rules_item_05" version_id="1" version_string="1.0.1"><![CDATA[Пятый пункт]]></phrase>
+    <phrase title="option_svg_rules_item_05_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение текста пятого пункта правил форума.]]></phrase>
+    <phrase title="option_svg_rules_item_06" version_id="1" version_string="1.0.1"><![CDATA[Шестой пункт]]></phrase>
+    <phrase title="option_svg_rules_item_06_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение текста шестого пункта правил форума.]]></phrase>
+    <phrase title="option_svg_rules_navigate_enable" version_id="4" version_string="1.0.4"><![CDATA[Меню навигации]]></phrase>
+    <phrase title="option_svg_rules_navigate_enable_explain" version_id="4" version_string="1.0.4"><![CDATA[Включение или отключение меню навигации по правилам форума.]]></phrase>
+    <phrase title="option_svg_rules_navitem_01" version_id="1" version_string="1.0.1"><![CDATA[Подпункт меню]]></phrase>
+    <phrase title="option_svg_rules_navitem_01_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение подпункта меню навигации]]></phrase>
+    <phrase title="option_svg_rules_navitem_02" version_id="1" version_string="1.0.1"><![CDATA[Подпункт меню]]></phrase>
+    <phrase title="option_svg_rules_navitem_02_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение подпункта меню навигации]]></phrase>
+    <phrase title="option_svg_rules_navitem_03" version_id="1" version_string="1.0.1"><![CDATA[Подпункт меню]]></phrase>
+    <phrase title="option_svg_rules_navitem_03_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение подпункта меню навигации.]]></phrase>
+    <phrase title="option_svg_rules_navitem_04" version_id="1" version_string="1.0.1"><![CDATA[Подпункт меню]]></phrase>
+    <phrase title="option_svg_rules_navitem_04_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение подпункта меню навигации.]]></phrase>
+    <phrase title="option_svg_rules_navitem_05" version_id="1" version_string="1.0.1"><![CDATA[Подпункт меню]]></phrase>
+    <phrase title="option_svg_rules_navitem_05_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение подпункта меню навигации.]]></phrase>
+    <phrase title="option_svg_rules_navitem_06" version_id="1" version_string="1.0.1"><![CDATA[Подпункт меню]]></phrase>
+    <phrase title="option_svg_rules_navitem_06_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение подпункта меню навигации.]]></phrase>
+    <phrase title="option_svg_rules_navtabs_enable" version_id="1" version_string="1.0.1"><![CDATA[Отключение вкладки]]></phrase>
+    <phrase title="option_svg_rules_navtabs_enable_explain" version_id="1" version_string="1.0.1"><![CDATA[Включение или отключение вкладки в меню навигации.]]></phrase>
+    <phrase title="option_svg_rules_navtabs_position" version_id="1" version_string="1.0.1"><![CDATA[Позиция вкладки]]></phrase>
+    <phrase title="option_svg_rules_navtabs_position_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение позиции вкладки в меню навигации.]]></phrase>
+    <phrase title="option_svg_rules_navtabs_title" version_id="1" version_string="1.0.1"><![CDATA[Название вкладки]]></phrase>
+    <phrase title="option_svg_rules_navtabs_title_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение названия вкладки в меню навигации.]]></phrase>
+    <phrase title="option_svg_rules_note" version_id="1" version_string="1.0.1"><![CDATA[Текст уведомления]]></phrase>
+    <phrase title="option_svg_rules_note_enable" version_id="1" version_string="1.0.1"><![CDATA[Уведомление над правилами]]></phrase>
+    <phrase title="option_svg_rules_note_enable_explain" version_id="1" version_string="1.0.1"><![CDATA[Включение или отключение уведомления над правилами форума.]]></phrase>
+    <phrase title="option_svg_rules_note_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение текста уведомления перед правилами форума. Используется форматирование текста в HTML формате.]]></phrase>
+    <phrase title="option_svg_rules_note_fa" version_id="1" version_string="1.0.1"><![CDATA[Иконка Font Awesome]]></phrase>
+    <phrase title="option_svg_rules_note_fa_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение иконки Font Awesome в уведомлении.]]></phrase>
+    <phrase title="option_svg_rules_rules_01" version_id="1" version_string="1.0.1"><![CDATA[Пункты правил]]></phrase>
+    <phrase title="option_svg_rules_rules_01_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение пунктов правил форума. Используется форматирование текста в HTML формате.]]></phrase>
+    <phrase title="option_svg_rules_rules_02" version_id="1" version_string="1.0.1"><![CDATA[Пункты правил]]></phrase>
+    <phrase title="option_svg_rules_rules_02_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение пунктов правил форума. Используется форматирование текста в HTML формате.]]></phrase>
+    <phrase title="option_svg_rules_rules_03" version_id="1" version_string="1.0.1"><![CDATA[Пункты правил]]></phrase>
+    <phrase title="option_svg_rules_rules_03_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение пунктов правил форума. Используется форматирование текста в HTML формате.]]></phrase>
+    <phrase title="option_svg_rules_rules_04" version_id="1" version_string="1.0.1"><![CDATA[Пункты правил]]></phrase>
+    <phrase title="option_svg_rules_rules_04_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение пунктов правил форума. Используется форматирование текста в HTML формате.]]></phrase>
+    <phrase title="option_svg_rules_rules_05" version_id="1" version_string="1.0.1"><![CDATA[Пункты правил]]></phrase>
+    <phrase title="option_svg_rules_rules_05_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение пунктов правил форума. Используется форматирование текста в HTML формате.]]></phrase>
+    <phrase title="option_svg_rules_rules_06" version_id="1" version_string="1.0.1"><![CDATA[Пункты правил]]></phrase>
+    <phrase title="option_svg_rules_rules_06_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение пунктов правил форума. Используется форматирование текста в HTML формате.]]></phrase>
+    <phrase title="option_svg_rules_title" version_id="1" version_string="1.0.1"><![CDATA[Название на вкладке браузера]]></phrase>
+    <phrase title="option_svg_rules_title_explain" version_id="1" version_string="1.0.1"><![CDATA[Изменение названия страницы на вкладке браузера.]]></phrase>
+    <phrase title="option_tosUrl" version_id="5" version_string="1.0.5"><![CDATA[Terms and Rules URL]]></phrase>
+    <phrase title="option_tosUrl_explain" version_id="5" version_string="1.0.5"><![CDATA[This link will be shown in the footer and users will have to agree to the terms and rules during registration.]]></phrase>
+    <phrase title="style_property_group_svg_forum_rules_property_master" version_id="1" version_string="1.0.1"><![CDATA[[SVG]Forum Rules]]></phrase>
+    <phrase title="style_property_group_svg_forum_rules_property_master_desc" version_id="1" version_string="1.0.1"><![CDATA[Настройки стиля правил форума.]]></phrase>
+    <phrase title="style_property_svg_forum_rules_description_master" version_id="2" version_string="1.0.2"><![CDATA[Стиль правил форума]]></phrase>
+    <phrase title="style_property_svg_forum_rules_master" version_id="2" version_string="1.0.2"><![CDATA[Правила форума]]></phrase>
+    <phrase title="style_property_svg_rules_note_background_deg_description_master" version_id="2" version_string="1.0.2"><![CDATA[Изменяется при выборе полосатого фона уведомления.]]></phrase>
+    <phrase title="style_property_svg_rules_note_background_deg_master" version_id="2" version_string="1.0.2"><![CDATA[Угол наклона полосок фона]]></phrase>
+    <phrase title="style_property_svg_rules_note_background_description_master" version_id="2" version_string="1.0.2"><![CDATA[Выбор вида фона уведомления над правилами форума.]]></phrase>
+    <phrase title="style_property_svg_rules_note_background_master" version_id="2" version_string="1.0.2"><![CDATA[Вид фона уведомления]]></phrase>
+    <phrase title="style_property_svg_rules_note_color_description_master" version_id="2" version_string="1.0.2"><![CDATA[Изменение цвета уведомления над правилами форума.]]></phrase>
+    <phrase title="style_property_svg_rules_note_color_master" version_id="2" version_string="1.0.2"><![CDATA[Цвет уведомления]]></phrase>
+    <phrase title="style_property_svg_rules_note_facolor_description_master" version_id="2" version_string="1.0.2"><![CDATA[Изменение цвета иконки уведомления.]]></phrase>
+    <phrase title="style_property_svg_rules_note_facolor_master" version_id="2" version_string="1.0.2"><![CDATA[Цвет иконки уведомления]]></phrase>
+    <phrase title="style_property_svg_rules_tab_color_description_master" version_id="1" version_string="1.0.1"><![CDATA[Изменение цвета заголовка вкладки в меню навигации.]]></phrase>
+    <phrase title="style_property_svg_rules_tab_color_hover_description_master" version_id="1" version_string="1.0.1"><![CDATA[Изменение цвета заголовка вкладки в меню навигации, при наведении.]]></phrase>
+    <phrase title="style_property_svg_rules_tab_color_hover_master" version_id="1" version_string="1.0.1"><![CDATA[Цвет заголовка вкладки при наведении]]></phrase>
+    <phrase title="style_property_svg_rules_tab_color_master" version_id="1" version_string="1.0.1"><![CDATA[Цвет заголовка вкладки]]></phrase>
+    <phrase title="style_property_svg_rules_tab_color_selected_description_master" version_id="1" version_string="1.0.1"><![CDATA[Изменение заголовка активной вкладки в меню навигации.]]></phrase>
+    <phrase title="style_property_svg_rules_tab_color_selected_master" version_id="1" version_string="1.0.1"><![CDATA[Цвет заголовка активной вкладки]]></phrase>
+    <phrase title="style_property_svg_rules_tab_iconfa_description_master" version_id="1" version_string="1.0.1"><![CDATA[Изменение иконки шрифта Font Awesome, перед заголовком вкладки в меню навигации.]]></phrase>
+    <phrase title="style_property_svg_rules_tab_iconfa_master" version_id="1" version_string="1.0.1"><![CDATA[Иконка Font Awesome]]></phrase>
+    <phrase title="svg_forum_rules_acquainted" global_cache="1" version_id="3" version_string="1.0.3"><![CDATA[C правилами форума ознакомлен]]></phrase>
+    <phrase title="svg_forum_rules_leave_page" global_cache="1" version_id="3" version_string="1.0.3"><![CDATA[Покинуть страницу]]></phrase>
+    <phrase title="svg_forum_rules_options_option_list_tab_1" global_cache="1" version_id="1" version_string="1.0.1"><![CDATA[Основные]]></phrase>
+    <phrase title="svg_forum_rules_options_option_list_tab_2" global_cache="1" version_id="3" version_string="1.0.3"><![CDATA[Уведомления]]></phrase>
+    <phrase title="svg_forum_rules_options_option_list_tab_3" global_cache="1" version_id="1" version_string="1.0.1"><![CDATA[Пункт 01]]></phrase>
+    <phrase title="svg_forum_rules_options_option_list_tab_4" global_cache="1" version_id="1" version_string="1.0.1"><![CDATA[Пункт 02]]></phrase>
+    <phrase title="svg_forum_rules_options_option_list_tab_5" global_cache="1" version_id="1" version_string="1.0.1"><![CDATA[Пункт 03]]></phrase>
+    <phrase title="svg_forum_rules_options_option_list_tab_6" global_cache="1" version_id="1" version_string="1.0.1"><![CDATA[Пункт 04]]></phrase>
+    <phrase title="svg_forum_rules_options_option_list_tab_7" global_cache="1" version_id="1" version_string="1.0.1"><![CDATA[Пункт 05]]></phrase>
+    <phrase title="svg_forum_rules_options_option_list_tab_8" global_cache="1" version_id="1" version_string="1.0.1"><![CDATA[Пункт 06]]></phrase>
+    <phrase title="svg_forum_rules_options_option_list_tab_9" global_cache="1" version_id="1" version_string="1.0.1"><![CDATA[Кнопки]]></phrase>
+    <phrase title="view_svg_forum_rules" global_cache="1" version_id="1" version_string="1.0.1"><![CDATA[Смотрит правила форума]]></phrase>
+  </phrases>
+  <route_prefixes>
+    <route_type type="public">
+      <prefix original_prefix="forum-rules" class="SvgForumRules_Route_Prefix_SvgRulesLink" build_link="all"/>
+    </route_type>
+  </route_prefixes>
+  <style_properties>
+    <property property_name="svg_rules_tab_color" property_type="scalar" definition="1" group_name="svg_forum_rules_property" title="Цвет заголовка вкладки" description="Изменение цвета заголовка вкладки в меню навигации." css_components="" scalar_type="color" scalar_parameters="" display_order="100" sub_group=""><![CDATA[rgb(251,140,0)]]></property>
+    <property property_name="svg_rules_tab_color_hover" property_type="scalar" definition="1" group_name="svg_forum_rules_property" title="Цвет заголовка вкладки при наведении" description="Изменение цвета заголовка вкладки в меню навигации, при наведении." css_components="" scalar_type="color" scalar_parameters="" display_order="110" sub_group=""><![CDATA[rgb(255,183,77)]]></property>
+    <property property_name="svg_rules_tab_color_selected" property_type="scalar" definition="1" group_name="svg_forum_rules_property" title="Цвет заголовка активной вкладки" description="Изменение заголовка активной вкладки в меню навигации." css_components="" scalar_type="color" scalar_parameters="" display_order="120" sub_group=""><![CDATA[rgb(230,81,0)]]></property>
+    <property property_name="svg_rules_tab_iconfa" property_type="scalar" definition="1" group_name="svg_forum_rules_property" title="Иконка Font Awesome" description="Изменение иконки шрифта Font Awesome, перед заголовком вкладки в меню навигации." css_components="" scalar_type="" scalar_parameters="" display_order="130" sub_group=""><![CDATA[]]></property>
+    <property property_name="svg_rules_note_color" property_type="scalar" definition="1" group_name="svg_forum_rules_property" title="Цвет уведомления" description="Изменение цвета уведомления над правилами форума." css_components="" scalar_type="color" scalar_parameters="" display_order="140" sub_group=""><![CDATA[rgb(244,67,54)]]></property>
+    <property property_name="svg_rules_note_facolor" property_type="scalar" definition="1" group_name="svg_forum_rules_property" title="Цвет иконки уведомления" description="Изменение цвета иконки уведомления." css_components="" scalar_type="color" scalar_parameters="" display_order="150" sub_group=""><![CDATA[@svg_rules_note_color]]></property>
+    <property property_name="svg_rules_note_background" property_type="scalar" definition="1" group_name="svg_forum_rules_property" title="Вид фона уведомления" description="Выбор вида фона уведомления над правилами форума." css_components="" scalar_type="template" scalar_parameters="svg_rules_note_background" display_order="160" sub_group=""><![CDATA[solid]]></property>
+    <property property_name="svg_rules_note_background_deg" property_type="scalar" definition="1" group_name="svg_forum_rules_property" title="Угол наклона полосок фона" description="Изменяется при выборе полосатого фона уведомления." css_components="" scalar_type="number" scalar_parameters="" display_order="170" sub_group=""><![CDATA[135deg]]></property>
+    <property property_name="svg_forum_rules" property_type="css" definition="1" group_name="svg_forum_rules_property" title="Правила форума" description="Стиль правил форума" css_components="text,background,border,layout,extra" scalar_type="" scalar_parameters="" display_order="1" sub_group=""><![CDATA[{"color":"rgb(84,110,122)","font-family":"'Open Sans', sans-serif"}]]></property>
+    <group group_name="svg_forum_rules_property" display_order="1">
+      <title>[SVG]Forum Rules</title>
+      <description>Настройки стиля правил форума.</description>
+    </group>
+  </style_properties>
+  <templates>
+    <template title="svg_forum_rules" version_id="4" version_string="1.0.4"><![CDATA[{xen:raw $xenOptions.svg_rules_googlefont_enable}
+
+<xen:h1>{$xenOptions.svg_rules_caption}</xen:h1>
+<xen:title>{$xenOptions.svg_rules_title}</xen:title>
+<xen:description>{$xenOptions.svg_rules_description}</xen:description>
+
+<xen:include template="svg_forum_rules_content" />
+
+<xen:if is="{$xenOptions.svg_forum_rules_sidebar_enable}">
+	<xen:sidebar>
+		<xen:include template="svg_forum_rules_sidebar" />
+	</xen:sidebar>
+</xen:if>]]></template>
+    <template title="svg_forum_rules.css" version_id="1" version_string="1.0.1"><![CDATA[.navTabs .navTab.forum-rules a.navLink {
+	color: {xen:property svg_rules_tab_color};
+}
+.navTabs .navTab.forum-rules a.navLink:hover {
+	color: {xen:property svg_rules_tab_color_hover};
+}
+.navTabs .navTab.forum-rules.selected a.navLink {
+	color: {xen:property svg_rules_tab_color_selected};
+}
+
+<xen:if is="{xen:property svg_rules_tab_iconfa}">
+	.navTabs .navTab.forum-rules a.navLink:before {
+		font-family: 'FontAwesome';
+		content: "\{xen:property svg_rules_tab_iconfa}";
+		padding-right: 2px;
+	}
+</xen:if>]]></template>
+    <template title="svg_forum_rules_content" version_id="4" version_string="1.0.4"><![CDATA[<xen:require css="svg_forum_rules_content.css" />
+
+<div class="specification">
+	
+	<xen:if is="{$xenOptions.svg_rules_navigate_enable}">
+		<xen:include template="svg_forum_rules_navigate" />
+	</xen:if>
+
+	<xen:if is="{$xenOptions.svg_rules_note_enable}">
+		<div class="svg-rules-note">
+			<table>
+				<tbody>
+					<tr>
+						<td>{xen:raw $xenOptions.svg_rules_note_fa}</td>
+						<td>{xen:raw $xenOptions.svg_rules_note}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</xen:if>
+	
+	<ol>
+		
+		<xen:if is="{$xenOptions.svg_rules_item_01}">
+			<li id="rules-0100">{$xenOptions.svg_rules_item_01}
+				<ol>
+					{xen:raw $xenOptions.svg_rules_rules_01}
+				</ol>
+			</li>
+		</xen:if>
+		
+		<xen:if is="{$xenOptions.svg_rules_item_02}">
+			<li id="rules-0200">{$xenOptions.svg_rules_item_02}
+				<ol>
+					{xen:raw $xenOptions.svg_rules_rules_02}
+				</ol>
+			</li>
+		</xen:if>
+		
+		<xen:if is="{$xenOptions.svg_rules_item_03}">
+			<li id="rules-0300">{$xenOptions.svg_rules_item_03}
+				<ol>
+					{xen:raw $xenOptions.svg_rules_rules_03}
+				</ol>
+			</li>
+		</xen:if>
+		
+		<xen:if is="{$xenOptions.svg_rules_item_04}">
+			<li id="rules-0400">{$xenOptions.svg_rules_item_04}
+				<ol>
+					{xen:raw $xenOptions.svg_rules_rules_04}
+				</ol>
+			</li>
+		</xen:if>
+
+		<xen:if is="{$xenOptions.svg_rules_item_05}">
+			<li id="rules-0500">{$xenOptions.svg_rules_item_05}
+				<ol>
+					{xen:raw $xenOptions.svg_rules_rules_05}
+				</ol>
+			</li>
+		</xen:if>		
+
+		<xen:if is="{$xenOptions.svg_rules_item_06}">
+			<li id="rules-0600">{$xenOptions.svg_rules_item_06}
+				<ol>
+					{xen:raw $xenOptions.svg_rules_rules_06}
+				</ol>
+			</li>
+		</xen:if>		
+
+	</ol>
+	
+	<xen:if is="{$xenOptions.svg_rules_button_enable}">
+		<xen:include template="svg_rules_button" />
+	</xen:if>
+	
+	<xen:include template="svg_forum_rules_scripts" />
+		  
+</div>]]></template>
+    <template title="svg_forum_rules_content.css" version_id="4" version_string="1.0.4"><![CDATA[.specification {
+	{xen:property svg_forum_rules}
+}
+.specification ol li:before {
+	content:counters(item,".") ". ";
+	counter-increment:item;
+	font-weight: bold;
+}
+.specification .svg_rules_nav ol li:first-child:before {
+	content: none;
+}
+.specification ol {
+	counter-reset:item;
+	margin: 10px;
+}
+.specification ol li {
+	display:block;
+	margin-left: 10px;
+	font-weight: bold;
+}
+.specification ol li li {
+	margin-left: 45px;
+	padding: 0 0 3px;
+	font-weight: normal;
+	text-indent: -25px;
+}
+
+.specification .svg-rules-note {
+	margin: 20px 0 30px;
+	border: 1px solid {xen:property svg_rules_note_color};
+	border-radius: 2px;
+	display: block;
+	color: {xen:property svg_rules_note_color};
+	font-size: 12px;
+	<xen:if is="{xen:property svg_rules_note_background} == 'striped'">
+		background: repeating-linear-gradient({xen:property svg_rules_note_background_deg}, {xen:helper rgba, {xen:property svg_rules_note_color}, 0.2}, {xen:helper rgba, {xen:property svg_rules_note_color}, 0.2} 10px, {xen:helper rgba, {xen:property svg_rules_note_color}, 0.1} 10px, {xen:helper rgba, {xen:property svg_rules_note_color}, 0.1} 20px);
+	<xen:elseif is="{xen:property svg_rules_note_background} == 'solid'" />
+		background: {xen:helper rgba, {xen:property svg_rules_note_color}, 0.1};
+	</xen:if>
+	text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+.specification .svg-rules-note .fa {
+	font-size: 40px;
+	color: {xen:property svg_rules_note_facolor};
+}
+.specification .svg-rules-note table {
+	width: 100%;
+	border: 0;
+}
+.specification .svg-rules-note table td {
+	padding: 10px;
+}
+.specification .svg-rules-note table td:first-child {
+	text-align: center;
+}
+.specification .svg-rules-note table td:nth-child(2) {
+	padding: 10px 5px 10px 0;
+}
+.specification .svg-rules-button {
+	display: block;
+	text-align: center;
+	margin: 20px 0 10px;
+}
+.specification .svg-rules-button .callToAction span {
+	font-size: 12px;
+}
+.specification .svg-rules-button label {
+	display: block;
+	text-align: left;
+	margin: 10px 5px 10px 50px;
+}
+.specification .svg-rules-button label span {
+	margin-left: 5px;
+}
+.specification .svg-rules-alert {
+	color: rgb(229,57,53);
+}
+.specification .svg_rules_nav {
+	border-top: 1px solid {xen:property primaryLighterStill};
+	border-bottom: 1px solid {xen:property primaryLighterStill};
+	padding: 5px 0;
+}]]></template>
+    <template title="svg_forum_rules_help_wrapper" version_id="5" version_string="1.0.5"><![CDATA[<xen:require css="help_wrapper.css" />
+<xen:edithint template="navigation_sidebar.css" />
+
+<div class="section container">
+	<div class="secondaryContent navigationSideBar">
+		<h3>{xen:phrase help}</h3>
+		<ul data-toggle-class="menuVisible">
+			<li class="section">
+				<ul>
+					<xen:hook name="help_sidebar_links">
+					<li><a href="{xen:link help/smilies}" class="{xen:if "{$selected} == 'smilies'", 'secondaryContent', 'primaryContent'}">{xen:phrase smilies}</a></li>
+					<!-- slot: pre_bb_codes -->
+					<li><a href="{xen:link help/bb-codes}" class="{xen:if "{$selected} == 'bbCodes'", 'secondaryContent', 'primaryContent'}">{xen:phrase bb_codes}</a></li>
+					<!-- slot: pre_trophies -->
+					<xen:if is="{$xenOptions.enableTrophies}">
+						<li><a href="{xen:link help/trophies}" class="{xen:if "{$selected} == 'trophies'", 'secondaryContent', 'primaryContent'}">{xen:phrase trophies}</a></li>
+					</xen:if>
+					<!-- slot: pre_cookies -->
+					<li><a href="{xen:link help/cookies}" class="{xen:if "{$selected} == 'cookies'", 'secondaryContent', 'primaryContent'}">{xen:phrase cookie_usage}</a></li>
+					<!-- slot: pre_tos_url -->
+					<xen:if is="{$tosUrl}">
+						<li><a href="{$tosUrl}" class="{xen:if "{$selected} == 'terms'", 'secondaryContent', 'primaryContent'}">{xen:phrase terms_and_rules}</a></li>
+					</xen:if>
+					</xen:hook>
+					<xen:foreach loop="$pages" value="$page">
+						<li><a href="{xen:link help, $page}" class="{xen:if "{$selected} == {$page.page_name}", 'secondaryContent', 'primaryContent'}">{$page.title}</a></li>
+					</xen:foreach>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</div>]]></template>
+    <template title="svg_forum_rules_navigate" version_id="4" version_string="1.0.4"><![CDATA[<div class="svg_rules_nav">
+	<ol>
+		<li id="rules-top"></li>
+		<xen:if is="{$xenOptions.svg_rules_item_01}">
+			<li><a href="forum-rules/#rules-0100">{$xenOptions.svg_rules_item_01}</a></li>
+		</xen:if>
+		<xen:if is="{$xenOptions.svg_rules_item_02}">
+			<li><a href="forum-rules/#rules-0200">{$xenOptions.svg_rules_item_02}</a></li>
+		</xen:if>
+		<xen:if is="{$xenOptions.svg_rules_item_03}">
+			<li><a href="forum-rules/#rules-0300">{$xenOptions.svg_rules_item_03}</a></li>
+		</xen:if>
+		<xen:if is="{$xenOptions.svg_rules_item_04}">
+			<li><a href="forum-rules/#rules-0400">{$xenOptions.svg_rules_item_04}</a></li>
+		</xen:if>
+		<xen:if is="{$xenOptions.svg_rules_item_05}">
+			<li><a href="forum-rules/#rules-0500">{$xenOptions.svg_rules_item_05}</a></li>
+		</xen:if>
+		<xen:if is="{$xenOptions.svg_rules_item_06}">
+			<li><a href="forum-rules/#rules-0600">{$xenOptions.svg_rules_item_06}</a></li>
+		</xen:if>	
+	</ol>
+</div>]]></template>
+    <template title="svg_forum_rules_scripts" version_id="4" version_string="1.0.4"><![CDATA[<xen:if is="{$xenOptions.svg_rules_alert_enable}">
+	<script>
+		XenForo.stackAlert('{xen:raw $xenOptions.svg_rules_alert_text}', {$xenOptions.svg_rules_alert_delay});
+	</script>
+</xen:if>
+
+<script>	
+	!function($){
+	   $(document).on('click', 'a[href*=#rules]', function () {
+	        $('html, body').animate({ scrollTop:  $('li[id="'+this.hash.slice(1)+'"]').offset().top }, 1500 ); 
+	        return false;
+	    });
+	}(jQuery);
+</script>
+
+<xen:if is="{$xenOptions.svg_rules_button_selection} == 'checkbox'">
+	<script>
+		function changeButton(checked) {
+		    if (checked === true) {
+		        document.getElementById('svgbutton').href = '/';
+		    } else {
+		        document.getElementById('svgbutton').href = 'forum-rules/#rules-top';
+		    }
+		}
+	</script>
+</xen:if>]]></template>
+    <template title="svg_forum_rules_sidebar" version_id="5" version_string="1.0.5"><![CDATA[<xen:include template="sidebar_online_users" />
+<xen:include template="forum_stats" />
+<!-- block: forum_stats -->
+<div class="section">
+	<div class="secondaryContent statsList" id="boardStats">
+		<h3>{xen:phrase forum_statistics}</h3>
+		<div class="pairsJustified">
+			<dl class="discussionCount"><dt>{xen:phrase discussions}:</dt>
+				<dd>{xen:number $boardTotals.discussions}</dd></dl>
+			<dl class="messageCount"><dt>{xen:phrase messages}:</dt>
+				<dd>{xen:number $boardTotals.messages}</dd></dl>
+			<dl class="memberCount"><dt>{xen:phrase members_count}:</dt>
+				<dd>{xen:number $boardTotals.users}</dd></dl>
+			<dl><dt>{xen:phrase latest_member}:</dt>
+				<dd><xen:username user="$boardTotals.latestUser" /></dd></dl>
+			<!-- slot: forum_stats_extra -->
+		</div>
+	</div>
+</div>
+<!-- end block: forum_stats -->
+<xen:include template="svg_forum_rules_help_wrapper" />
+<xen:include template="sidebar_share_page">
+	<xen:set var="$url">{xen:link canonical:forums}</xen:set>
+</xen:include>]]></template>
+    <template title="svg_rules_button" version_id="4" version_string="1.0.4"><![CDATA[<xen:if is="{$xenOptions.svg_rules_button_selection} == 'checkbox'">
+	<div class="svg-rules-button">
+		<xen:if is="{$xenOptions.svg_rules_button_home} AND {$xenOptions.svg_rules_button_top}">
+			<label for="svgcheckbox"><input id="svgcheckbox" type="checkbox" onChange="changeButton(this.checked);"/><span>{xen:phrase svg_forum_rules_acquainted}</span></label>
+			<a class="callToAction" id="svgbutton" href="forum-rules/#rules-top"><span>{xen:phrase svg_forum_rules_leave_page}</span></a>
+		</xen:if>
+		<xen:if is="{$xenOptions.svg_rules_button_topic}">
+			<a class="callToAction" href="{$xenOptions.svg_rules_button_topic_link}"><span>{$xenOptions.svg_rules_button_topic}</span></a>
+		</xen:if>
+	</div>
+<xen:elseif is="{$xenOptions.svg_rules_button_selection} == 'simple'" />
+	<div class="svg-rules-button">
+		<xen:if is="{$xenOptions.svg_rules_button_home} AND {$xenOptions.svg_rules_button_top}">
+			<a href="/" class="callToAction"><span>{$xenOptions.svg_rules_button_home}</span></a>
+			<a href="forum-rules/#rules-top" class="callToAction"><span>{$xenOptions.svg_rules_button_top}</span></a>
+		</xen:if>
+		<xen:if is="{$xenOptions.svg_rules_button_topic}">
+			<a href="{$xenOptions.svg_rules_button_topic_link}" class="callToAction"><span>{$xenOptions.svg_rules_button_topic}</span></a>
+		</xen:if>
+	</div>
+</xen:if>]]></template>
+    <template title="svg_rules_sublinks" version_id="1" version_string="1.0.1"><![CDATA[<ul class="secondaryContent blockLinksList">
+	<xen:if is="{$xenOptions.svg_rules_navitem_01}">
+		<li><a href="forum-rules/#rules-0100">{$xenOptions.svg_rules_navitem_01}</a></li>
+	</xen:if>
+	<xen:if is="{$xenOptions.svg_rules_navitem_02}">
+		<li><a href="forum-rules/#rules-0200">{$xenOptions.svg_rules_navitem_02}</a></li>
+	</xen:if>
+	<xen:if is="{$xenOptions.svg_rules_navitem_03}">
+		<li><a href="forum-rules/#rules-0300">{$xenOptions.svg_rules_navitem_03}</a></li>
+	</xen:if>
+	<xen:if is="{$xenOptions.svg_rules_navitem_04}">
+		<li><a href="forum-rules/#rules-0400">{$xenOptions.svg_rules_navitem_04}</a></li>
+	</xen:if>
+	<xen:if is="{$xenOptions.svg_rules_navitem_05}">
+		<li><a href="forum-rules/#rules-0500">{$xenOptions.svg_rules_navitem_05}</a></li>
+	</xen:if>
+	<xen:if is="{$xenOptions.svg_rules_navitem_06}">
+		<li><a href="forum-rules/#rules-0600">{$xenOptions.svg_rules_navitem_06}</a></li>
+	</xen:if>		
+</ul>]]></template>
+  </templates>
+  <public_template_modifications>
+    <modification template="EXTRA.css" modification_key="svg_forum_rules_extra" description="" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#^.*$#su]]></find>
+      <replace><![CDATA[$0
+<xen:include template="svg_forum_rules.css" />]]></replace>
+    </modification>
+  </public_template_modifications>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
+
